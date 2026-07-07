@@ -646,10 +646,11 @@
        Replace the placeholder with your real URL when the backend is ready.
        Contract:
          POST { code: "<enteredCode>" }
-         → 200 JSON { success: true, guestName, customMessage, allowedGuests }
+         → success:  { success: true, guestName, customMessage, allowedGuests }
+         → rejected: { success: false, error: "<message shown to the guest>" }
        Until you set this, a built-in DEMO drives the page so you can preview.
     ================================================================ */
-    const API_URI = "PASTE_YOUR_ENDPOINT_HERE";
+    const API_URI = "http://localhost:3000/api/verify";
 
     /* ================================================================
        ②  EVENT DETAILS (shared by every guest — edit freely)
@@ -779,8 +780,10 @@
       input.classList.add("shake");
     }
     function messageFor(err) {
+      // Prefer the exact message the server sent back (data.error).
+      if (err && typeof err.message === "string" && err.message.trim()) return err.message;
       if (err && err.type === "invalid")
-        return "عذرًا، هذا الكود غير صحيح. برجاء التأكد والمحاولة مرة أخرى.";
+        return "كود الدعوة غير صحيح، يرجى التأكد وإعادة المحاولة";
       return "تعذّر الاتصال بالخادم حاليًا. برجاء المحاولة مرة أخرى.";
     }
 
@@ -789,7 +792,9 @@
       // DEMO branch — any code works; type "0000" to preview the error state.
       if (USE_DEMO) {
         await wait(900);
-        if (code === "0000") throw { type: "invalid" };
+        if (code === "0000") {
+          throw { type: "invalid", message: "كود الدعوة غير صحيح، يرجى التأكد وإعادة المحاولة" };
+        }
         return {
           success: true,
           guestName: "عائلة الأستاذ محمود",
@@ -809,13 +814,20 @@
       } catch (_networkErr) {
         throw { type: "network" };
       }
-      if (!res.ok) throw { type: "network" };
 
-      let data;
-      try { data = await res.json(); }
-      catch (_parseErr) { throw { type: "network" }; }
+      // Read the body even on a non-2xx status, so we can surface the server's own message.
+      let data = null;
+      try { data = await res.json(); } catch (_parseErr) { data = null; }
 
-      if (!data || data.success !== true) throw { type: "invalid" };
+      // Server explicitly rejected the code → show ITS "error" text.
+      if (data && data.success === false) {
+        const msg = (typeof data.error === "string" && data.error.trim()) ? data.error : "";
+        throw { type: "invalid", message: msg };
+      }
+
+      // Anything that isn't a clean success = a connection / server problem.
+      if (!res.ok || !data || data.success !== true) throw { type: "network" };
+
       return data;
     }
 
