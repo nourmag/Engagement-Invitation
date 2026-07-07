@@ -1,744 +1,641 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
-    <title>دعوة خطوبة</title>
-
-    <!-- ============================================================
-         Google Fonts:
-         • Cairo   → all UI / body text
-         • Tajawal → alternative body face (swap in CSS if preferred)
-         • Amiri   → the couple's names (royal, classic feel)
-    ============================================================ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link
-            href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap"
-            rel="stylesheet"
-    />
-
-    <!-- Tailwind CDN (per the plan) — used only as a convenience layer.
-         All theming/animation below lives in hand-written CSS so the page
-         is fully styled even before Tailwind finishes compiling (no flash). -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ivory: "var(--surface)",
-                        navy: "var(--ink)",
-                        gold: "var(--gold-base)",
-                    },
-                    fontFamily: {
-                        sans: ["Cairo", "Tajawal", "sans-serif"],
-                        amiri: ["Amiri", "serif"],
-                    },
-                },
-            },
-        };
-    </script>
-
-    <style>
-        /* ==========================================================
-           DESIGN TOKENS
-           To switch navy → emerald: change --ink to var(--emerald).
-        ========================================================== */
-        :root {
-            --ivory-top: #FDFBF7;
-            --ivory-bottom: #F3ECDD;
-            --surface: #FFFDF9;
-            --surface-2: #FBF6EC;
-
-            --ink: #1B2A4A; /* deep navy  (default primary text)   */
-            --ink-soft: #3A4A6B;
-            --emerald: #12433A; /* alt theme — set --ink to this to swap */
-
-            --gold-deep: #A8823F;
-            --gold-base: #C6A15B;
-            --gold-hi: #ECDBAB;
-            --gold-line: rgba(198, 161, 91, 0.34);
-
-            --danger: #9A3B2F; /* muted terracotta for errors         */
-
-            --ease: cubic-bezier(0.22, 1, 0.36, 1);
-            --shadow: 0 28px 70px -28px rgba(27, 42, 74, 0.22),
-            0 10px 28px -14px rgba(168, 130, 63, 0.20);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100dvh;
-            display: flex;
-            flex-direction: column; /* + margin:auto on card = safe centering + scroll */
-            padding: 26px 18px;
-            color: var(--ink);
-            font-family: "Cairo", "Tajawal", sans-serif;
-            background: radial-gradient(1100px 560px at 50% -12%, rgba(198, 161, 91, 0.12), transparent 62%),
-            linear-gradient(180deg, var(--ivory-top), var(--ivory-bottom));
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-        }
-
-        /* Whisper-quiet gold diamond texture behind everything */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 18l3 3-3 3-3-3z' fill='%23C6A15B'/%3E%3C/svg%3E");
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ==========================================================
-           THE ENVELOPE (card)
-        ========================================================== */
-        .envelope {
-            position: relative;
-            z-index: 1;
-            margin: auto; /* centers vertically & horizontally, scrolls if tall */
-            width: 100%;
-            max-width: 460px;
-            padding: 42px 30px 34px;
-            background: linear-gradient(180deg, var(--surface), var(--surface-2));
-            border: 1px solid var(--gold-line);
-            border-radius: 28px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        /* gilded top edge */
-        .envelope::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: 4px;
-            background: linear-gradient(90deg,
-            transparent, var(--gold-base), var(--gold-hi), var(--gold-base), transparent);
-        }
-
-        /* fine inner frame — the "double border" of a formal card */
-        .envelope::after {
-            content: "";
-            position: absolute;
-            inset: 11px;
-            border: 1px solid rgba(198, 161, 91, 0.18);
-            border-radius: 20px;
-            pointer-events: none;
-        }
-
-        /* ==========================================================
-           SCREENS (welcome / loading / reveal)
-        ========================================================== */
-        .screen {
-            display: none;
-            transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        .screen.leaving {
-            opacity: 0;
-            transform: translateY(-22px);
-            pointer-events: none;
-        }
-
-        /* staggered entrance for children — driven by --i on each item */
-        .rise {
-            opacity: 0;
-            transform: translateY(22px);
-            transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
-        }
-
-        .screen.in .rise {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: calc(var(--i, 0) * 90ms);
-        }
-
-        /* ==========================================================
-           MONOGRAM
-        ========================================================== */
-        .monogram {
-            width: 98px;
-            height: 102px;
-            margin: 0 auto;
-            border-radius: 50%;
-            border: 2.5px solid var(--gold-base);
-            display: grid;
-            place-items: center;
-            box-shadow: 0 0 0 6px rgba(198, 161, 91, 0.06),
-            inset 0 0 22px rgba(198, 161, 91, 0.08);
-        }
-
-        .monogram--sm {
-            width: 64px;
-            height: 64px;
-        }
-
-        .monogram-inner {
-            font-family: "Amiri", serif;
-            font-weight: 700;
-            font-size: 30px;
-            line-height: 2;
-            padding-top: 3px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: linear-gradient(135deg, var(--gold-deep), var(--gold-hi), var(--gold-base));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .monogram--sm .monogram-inner {
-            font-size: 23px;
-        }
-
-        .monogram-amp {
-            font-size: 0.62em;
-            opacity: 0.75;
-        }
-
-        /* ==========================================================
-           WELCOME
-        ========================================================== */
-        .eyebrow {
-            text-align: center;
-            color: var(--gold-deep);
-            font-size: 12.5px;
-            font-weight: 600;
-            margin: 22px 0 6px; /* NOTE: no letter-spacing on Arabic (breaks ligatures) */
-        }
-
-        .welcome-title {
-            text-align: center;
-            color: var(--ink);
-            font-size: 23px;
-            font-weight: 700;
-            line-height: 1.6;
-            margin: 0 0 10px;
-        }
-
-        .welcome-sub {
-            text-align: center;
-            color: var(--ink-soft);
-            font-size: 14.5px;
-            font-weight: 400;
-            line-height: 1.9;
-            margin: 0 auto 26px;
-            max-width: 32ch;
-        }
-
-        .code-input {
-            width: 100%;
-            padding: 16px 20px;
-            margin-bottom: 14px;
-            border: 1.5px solid rgba(198, 161, 91, 0.42);
-            border-radius: 15px;
-            background: var(--surface);
-            color: var(--ink);
-            font-family: inherit;
-            font-size: 16px; /* 16px avoids iOS zoom-on-focus */
-            font-weight: 600;
-            text-align: center;
-            outline: none;
-            transition: border-color 0.35s var(--ease),
-            box-shadow 0.35s var(--ease),
-            background 0.35s var(--ease);
-        }
-
-        .code-input::placeholder {
-            color: rgba(27, 42, 74, 0.40);
-            font-weight: 500;
-        }
-
-        .code-input:focus {
-            border-color: var(--gold-base);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(198, 161, 91, 0.16);
-        }
-
-        /* primary action — the gilded button */
-        .btn-primary {
-            position: relative;
-            width: 100%;
-            padding: 16px 24px;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 700;
-            color: #2C2109;
-            background: linear-gradient(135deg, var(--gold-deep), var(--gold-base) 46%, var(--gold-hi));
-            box-shadow: 0 14px 30px -14px rgba(168, 130, 63, 0.55),
-            inset 0 1px 0 rgba(255, 255, 255, 0.38);
-            transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 42px -16px rgba(168, 130, 63, 0.6),
-            inset 0 1px 0 rgba(255, 255, 255, 0.45);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0) scale(0.99);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: default;
-            transform: none;
-        }
-
-        /* slow, infrequent light sweep — visible on touch too */
-        .btn-primary::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -60%;
-            width: 42%;
-            height: 100%;
-            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-            transform: skewX(-20deg);
-            animation: sweep 4.6s var(--ease) infinite;
-        }
-
-        @keyframes sweep {
-            0%, 62% {
-                left: -60%;
-            }
-            100% {
-                left: 135%;
-            }
-        }
-
-        .error-msg {
-            min-height: 18px;
-            margin-top: 12px;
-            text-align: center;
-            color: var(--danger);
-            font-size: 13.5px;
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .error-msg.show {
-            opacity: 1;
-        }
-
-        @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            20% {
-                transform: translateX(-8px);
-            }
-            40% {
-                transform: translateX(7px);
-            }
-            60% {
-                transform: translateX(-5px);
-            }
-            80% {
-                transform: translateX(3px);
-            }
-        }
-
-        .shake {
-            animation: shake 0.5s ease;
-        }
-
-        /* ==========================================================
-           LOADING
-        ========================================================== */
-        .loading-wrap {
-            text-align: center;
-            padding: 22px 0 12px;
-        }
-
-        .loading-mono {
-            animation: pulse 1.7s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.06);
-                opacity: 0.85;
-            }
-        }
-
-        .loading-text {
-            margin: 22px 0 0;
-            font-size: 15px;
-            font-weight: 600;
-            background: linear-gradient(90deg, rgba(198, 161, 91, 0.35), var(--gold-deep), rgba(198, 161, 91, 0.35));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: goldShimmer 2.1s linear infinite;
-        }
-
-        .dots {
-            display: inline-flex;
-            gap: 6px;
-            margin-top: 16px;
-        }
-
-        .dots span {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--gold-base);
-            animation: dotPulse 1.2s ease-in-out infinite;
-        }
-
-        .dots span:nth-child(2) {
-            animation-delay: 0.15s;
-        }
-
-        .dots span:nth-child(3) {
-            animation-delay: 0.30s;
-        }
-
-        @keyframes dotPulse {
-            0%, 100% {
-                opacity: 0.3;
-                transform: translateY(0);
-            }
-            50% {
-                opacity: 1;
-                transform: translateY(-4px);
-            }
-        }
-
-        @keyframes goldShimmer {
-            to {
-                background-position: 200% center;
-            }
-        }
-
-        /* ==========================================================
-           REVEAL
-        ========================================================== */
-        .guest-eyebrow {
-            text-align: center;
-            color: var(--gold-deep);
-            font-size: 13px;
-            font-weight: 600;
-            margin: 20px 0 8px;
-        }
-
-        .greeting {
-            text-align: center;
-            color: var(--ink);
-            font-size: 17.5px;
-            font-weight: 500;
-            line-height: 1.9;
-            margin: 0 auto;
-            max-width: 34ch;
-        }
-
-        .ornament {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin: 22px auto;
-        }
-
-        .ornament .line {
-            width: 62px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-base));
-        }
-
-        .ornament .line.right {
-            background: linear-gradient(90deg, var(--gold-base), transparent);
-        }
-
-        .ornament .diamond {
-            width: 7px;
-            height: 7px;
-            transform: rotate(45deg);
-            background: var(--gold-base);
-            box-shadow: 0 0 0 3px rgba(198, 161, 91, 0.12);
-        }
-
-        .couple-names {
-            text-align: center;
-            font-family: "Amiri", serif;
-            font-weight: 700;
-            font-size: clamp(34px, 9vw, 52px);
-            line-height: 1.22;
-            margin: 0;
-            background: linear-gradient(120deg,
-            var(--gold-deep) 0%, var(--gold-hi) 30%, var(--gold-base) 55%, var(--gold-hi) 76%, var(--gold-deep) 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            filter: drop-shadow(0 3px 12px rgba(198, 161, 91, 0.22));
-            animation: goldShimmer 6.5s linear infinite;
-        }
-
-        .couple-names .amp {
-            font-size: 0.58em;
-            opacity: 0.82;
-            padding: 0 0.12em;
-        }
-
-        .invite-line {
-            text-align: center;
-            color: var(--ink-soft);
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 1.9;
-            margin: 12px auto 0;
-            max-width: 30ch;
-        }
-
-        .center {
-            text-align: center;
-        }
-
-        .guest-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            margin-top: 22px;
-            padding: 12px 22px;
-            border-radius: 999px;
-            border: 1px solid rgba(198, 161, 91, 0.32);
-            background: linear-gradient(180deg, rgba(198, 161, 91, 0.10), rgba(198, 161, 91, 0.03));
-            color: var(--ink);
-            font-size: 14.5px;
-            font-weight: 600;
-        }
-
-        .guest-chip .count {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--gold-deep);
-        }
-
-        .details {
-            margin-top: 22px;
-            border: 1px solid rgba(198, 161, 91, 0.22);
-            border-radius: 18px;
-            background: var(--surface);
-            overflow: hidden;
-        }
-
-        .detail-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 15px 18px;
-        }
-
-        .detail-row + .detail-row {
-            border-top: 1px solid rgba(198, 161, 91, 0.14);
-        }
-
-        .detail-icon {
-            flex: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            color: var(--gold-deep);
-            background: rgba(198, 161, 91, 0.10);
-        }
-
-        .detail-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .detail-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--ink-soft);
-        }
-
-        .detail-value {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--ink);
-            line-height: 1.6;
-        }
-
-        .btn-map {
-            position: relative;
-            width: 100%;
-            margin-top: 22px;
-            padding: 15px 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            border: 1.5px solid var(--gold-base);
-            border-radius: 15px;
-            background: transparent;
-            color: var(--gold-deep);
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: color 0.4s var(--ease), background 0.4s var(--ease),
-            border-color 0.4s var(--ease), box-shadow 0.4s var(--ease),
-            transform 0.4s var(--ease);
-        }
-
-        .btn-map:hover {
-            transform: translateY(-2px);
-            color: #3A2C12;
-            background: linear-gradient(135deg, var(--gold-base), var(--gold-hi));
-            border-color: var(--gold-hi);
-            box-shadow: 0 14px 32px -12px rgba(198, 161, 91, 0.5);
-        }
-
-        .btn-map:active {
-            transform: translateY(0);
-        }
-
-        .closing {
-            text-align: center;
-            color: var(--ink-soft);
-            font-size: 13px;
-            font-weight: 500;
-            margin: 22px 0 0;
-        }
-
-        /* ==========================================================
-           FOCUS + REDUCED MOTION (quality floor)
-        ========================================================== */
-        :focus-visible {
-            outline: 2px solid var(--gold-base);
-            outline-offset: 3px;
-            border-radius: 6px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.001ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.001ms !important;
-            }
-
-            .rise {
-                opacity: 1 !important;
-                transform: none !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>دعوة خطوبة</title>
+
+  <!-- ============================================================
+       Google Fonts:
+       • Cairo   → all UI / body text
+       • Tajawal → alternative body face (swap in CSS if preferred)
+       • Amiri   → the couple's names (royal, classic feel)
+  ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Tailwind CDN (per the plan) — used only as a convenience layer.
+       All theming/animation below lives in hand-written CSS so the page
+       is fully styled even before Tailwind finishes compiling (no flash). -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ivory: "var(--surface)",
+            navy: "var(--ink)",
+            gold: "var(--gold-base)",
+          },
+          fontFamily: {
+            sans: ["Cairo", "Tajawal", "sans-serif"],
+            amiri: ["Amiri", "serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* ==========================================================
+       DESIGN TOKENS
+       To switch navy → emerald: change --ink to var(--emerald).
+    ========================================================== */
+    :root {
+      --ivory-top: #FDFBF7;
+      --ivory-bottom: #F3ECDD;
+      --surface: #FFFDF9;
+      --surface-2: #FBF6EC;
+
+      --ink: #1B2A4A;          /* deep navy  (default primary text)   */
+      --ink-soft: #3A4A6B;
+      --emerald: #12433A;      /* alt theme — set --ink to this to swap */
+
+      --gold-deep: #A8823F;
+      --gold-base: #C6A15B;
+      --gold-hi: #ECDBAB;
+      --gold-line: rgba(198, 161, 91, 0.34);
+
+      --danger: #9A3B2F;       /* muted terracotta for errors         */
+
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow:
+        0 28px 70px -28px rgba(27, 42, 74, 0.22),
+        0 10px 28px -14px rgba(168, 130, 63, 0.20);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;      /* + margin:auto on card = safe centering + scroll */
+      padding: 26px 18px;
+      color: var(--ink);
+      font-family: "Cairo", "Tajawal", sans-serif;
+      background:
+        radial-gradient(1100px 560px at 50% -12%, rgba(198, 161, 91, 0.12), transparent 62%),
+        linear-gradient(180deg, var(--ivory-top), var(--ivory-bottom));
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Whisper-quiet gold diamond texture behind everything */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 18l3 3-3 3-3-3z' fill='%23C6A15B'/%3E%3C/svg%3E");
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==========================================================
+       THE ENVELOPE (card)
+    ========================================================== */
+    .envelope {
+      position: relative;
+      z-index: 1;
+      margin: auto;                 /* centers vertically & horizontally, scrolls if tall */
+      width: 100%;
+      max-width: 460px;
+      padding: 42px 30px 34px;
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--gold-line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    /* gilded top edge */
+    .envelope::before {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 4px;
+      background: linear-gradient(90deg,
+        transparent, var(--gold-base), var(--gold-hi), var(--gold-base), transparent);
+    }
+    /* fine inner frame — the "double border" of a formal card */
+    .envelope::after {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      border: 1px solid rgba(198, 161, 91, 0.18);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    /* ==========================================================
+       SCREENS (welcome / loading / reveal)
+    ========================================================== */
+    .screen {
+      display: none;
+      transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+    }
+    .screen.active { display: block; }
+    .screen.leaving {
+      opacity: 0;
+      transform: translateY(-22px);
+      pointer-events: none;
+    }
+
+    /* staggered entrance for children — driven by --i on each item */
+    .rise {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .screen.in .rise {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: calc(var(--i, 0) * 90ms);
+    }
+
+    /* ==========================================================
+       MONOGRAM
+    ========================================================== */
+    .monogram {
+      width: 86px;
+      height: 86px;
+      margin: 0 auto;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-base);
+      display: grid;
+      place-items: center;
+      box-shadow:
+        0 0 0 6px rgba(198, 161, 91, 0.06),
+        inset 0 0 22px rgba(198, 161, 91, 0.08);
+    }
+    .monogram--sm { width: 64px; height: 64px; }
+
+    .monogram-inner {
+      font-family: "Amiri", serif;
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 1.6;            /* generous room so Amiri swashes stay inside the painted box */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--gold-deep), var(--gold-hi), var(--gold-base));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .monogram--sm .monogram-inner { font-size: 23px; }
+    .monogram-amp { font-size: 0.62em; opacity: 0.75; }
+
+    /* ==========================================================
+       WELCOME
+    ========================================================== */
+    .eyebrow {
+      text-align: center;
+      color: var(--gold-deep);
+      font-size: 12.5px;
+      font-weight: 600;
+      margin: 22px 0 6px;         /* NOTE: no letter-spacing on Arabic (breaks ligatures) */
+    }
+    .welcome-title {
+      text-align: center;
+      color: var(--ink);
+      font-size: 23px;
+      font-weight: 700;
+      line-height: 1.6;
+      margin: 0 0 10px;
+    }
+    .welcome-sub {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 14.5px;
+      font-weight: 400;
+      line-height: 1.9;
+      margin: 0 auto 26px;
+      max-width: 32ch;
+    }
+
+    .code-input {
+      width: 100%;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      border: 1.5px solid rgba(198, 161, 91, 0.42);
+      border-radius: 15px;
+      background: var(--surface);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 16px;            /* 16px avoids iOS zoom-on-focus */
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.35s var(--ease),
+                  box-shadow 0.35s var(--ease),
+                  background 0.35s var(--ease);
+    }
+    .code-input::placeholder { color: rgba(27, 42, 74, 0.40); font-weight: 500; }
+    .code-input:focus {
+      border-color: var(--gold-base);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(198, 161, 91, 0.16);
+    }
+
+    /* primary action — the gilded button */
+    .btn-primary {
+      position: relative;
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      color: #2C2109;
+      background: linear-gradient(135deg, var(--gold-deep), var(--gold-base) 46%, var(--gold-hi));
+      box-shadow:
+        0 14px 30px -14px rgba(168, 130, 63, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.38);
+      transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 20px 42px -16px rgba(168, 130, 63, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+    .btn-primary:active { transform: translateY(0) scale(0.99); }
+    .btn-primary:disabled { opacity: 0.7; cursor: default; transform: none; }
+    /* slow, infrequent light sweep — visible on touch too */
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      top: 0; left: -60%;
+      width: 42%; height: 100%;
+      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+      transform: skewX(-20deg);
+      animation: sweep 4.6s var(--ease) infinite;
+    }
+    @keyframes sweep {
+      0%, 62% { left: -60%; }
+      100%    { left: 135%; }
+    }
+
+    .error-msg {
+      min-height: 18px;
+      margin-top: 12px;
+      text-align: center;
+      color: var(--danger);
+      font-size: 13.5px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .error-msg.show { opacity: 1; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(7px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(3px); }
+    }
+    .shake { animation: shake 0.5s ease; }
+
+    /* ==========================================================
+       LOADING
+    ========================================================== */
+    .loading-wrap { text-align: center; padding: 22px 0 12px; }
+    .loading-mono { animation: pulse 1.7s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1);    opacity: 1;   }
+      50%      { transform: scale(1.06); opacity: 0.85; }
+    }
+    .loading-text {
+      margin: 22px 0 0;
+      padding-bottom: 3px;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      background: linear-gradient(90deg, rgba(198, 161, 91, 0.35), var(--gold-deep), rgba(198, 161, 91, 0.35));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: goldShimmer 2.1s linear infinite;
+    }
+    .dots {
+      display: inline-flex;
+      gap: 6px;
+      margin-top: 16px;
+    }
+    .dots span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold-base);
+      animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.15s; }
+    .dots span:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50%      { opacity: 1;   transform: translateY(-4px); }
+    }
+
+    @keyframes goldShimmer { to { background-position: 200% center; } }
+
+    /* ==========================================================
+       REVEAL
+    ========================================================== */
+    .guest-eyebrow {
+      text-align: center;
+      color: var(--gold-deep);
+      font-size: 13px;
+      font-weight: 600;
+      margin: 20px 0 8px;
+    }
+    .greeting {
+      text-align: center;
+      color: var(--ink);
+      font-size: 17.5px;
+      font-weight: 500;
+      line-height: 1.9;
+      margin: 0 auto;
+      max-width: 34ch;
+    }
+
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 22px auto;
+    }
+    .ornament .line {
+      width: 62px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-base));
+    }
+    .ornament .line.right { background: linear-gradient(90deg, var(--gold-base), transparent); }
+    .ornament .diamond {
+      width: 7px; height: 7px;
+      transform: rotate(45deg);
+      background: var(--gold-base);
+      box-shadow: 0 0 0 3px rgba(198, 161, 91, 0.12);
+    }
+
+    .couple-names {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.02em;
+      text-align: center;
+      font-family: "Amiri", serif;
+      font-weight: 700;
+      font-size: clamp(30px, 7.6vw, 46px);
+      line-height: 1.3;
+      margin: 0;
+      padding: 0.04em 0.04em 0.3em;   /* bottom room so name swashes aren't clipped */
+      background: linear-gradient(120deg,
+        var(--gold-deep) 0%, var(--gold-hi) 30%, var(--gold-base) 55%, var(--gold-hi) 76%, var(--gold-deep) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 3px 12px rgba(198, 161, 91, 0.22));
+      animation: goldShimmer 6.5s linear infinite;
+    }
+    .couple-names .name-line { display: block; line-height: 1.5; }
+    .couple-names .amp { font-size: 0.5em; line-height: 1; }
+
+    .invite-line {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.9;
+      margin: 12px auto 0;
+      max-width: 30ch;
+    }
+
+    .center { text-align: center; }
+
+    .guest-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 22px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(198, 161, 91, 0.32);
+      background: linear-gradient(180deg, rgba(198, 161, 91, 0.10), rgba(198, 161, 91, 0.03));
+      color: var(--ink);
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+    .guest-chip .count {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gold-deep);
+    }
+
+    .details {
+      margin-top: 22px;
+      border: 1px solid rgba(198, 161, 91, 0.22);
+      border-radius: 18px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 18px;
+    }
+    .detail-row + .detail-row { border-top: 1px solid rgba(198, 161, 91, 0.14); }
+    .detail-icon {
+      flex: none;
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--gold-deep);
+      background: rgba(198, 161, 91, 0.10);
+    }
+    .detail-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .detail-label { font-size: 12px; font-weight: 500; color: var(--ink-soft); }
+    .detail-value { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.6; }
+
+    .btn-map {
+      position: relative;
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1.5px solid var(--gold-base);
+      border-radius: 15px;
+      background: transparent;
+      color: var(--gold-deep);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.4s var(--ease), background 0.4s var(--ease),
+                  border-color 0.4s var(--ease), box-shadow 0.4s var(--ease),
+                  transform 0.4s var(--ease);
+    }
+    .btn-map:hover {
+      transform: translateY(-2px);
+      color: #3A2C12;
+      background: linear-gradient(135deg, var(--gold-base), var(--gold-hi));
+      border-color: var(--gold-hi);
+      box-shadow: 0 14px 32px -12px rgba(198, 161, 91, 0.5);
+    }
+    .btn-map:active { transform: translateY(0); }
+
+    .closing {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 500;
+      margin: 22px 0 0;
+    }
+
+    /* ==========================================================
+       RESPONSIVE
+    ========================================================== */
+    /* Laptop / desktop — a little more presence and breathing room */
+    @media (min-width: 700px) {
+      .envelope { max-width: 484px; padding: 50px 42px 42px; }
+      .welcome-title { font-size: 24px; }
+      .greeting { font-size: 18px; }
+    }
+
+    /* Phones — tighten padding, scale type down a notch, keep it legible */
+    @media (max-width: 480px) {
+      body { padding: 16px 12px; }
+      .envelope { padding: 32px 20px 28px; border-radius: 22px; }
+      .envelope::after { inset: 9px; border-radius: 16px; }
+      .monogram { width: 76px; height: 76px; }
+      .monogram-inner { font-size: 27px; }
+      .monogram--sm { width: 60px; height: 60px; }
+      .welcome-title { font-size: 20px; }
+      .welcome-sub { font-size: 13.5px; }
+      .greeting { font-size: 16px; }
+      .invite-line { font-size: 13.5px; }
+      .code-input, .btn-primary { font-size: 15.5px; padding: 15px 18px; }
+      .guest-chip { font-size: 13.5px; padding: 11px 18px; }
+      .detail-row { padding: 14px 15px; gap: 12px; }
+      .detail-icon { width: 38px; height: 38px; }
+      .detail-value { font-size: 14.5px; }
+      .btn-map { font-size: 14.5px; padding: 14px 18px; }
+      .ornament .line { width: 46px; }
+    }
+
+    /* ==========================================================
+       FOCUS + REDUCED MOTION (quality floor)
+    ========================================================== */
+    :focus-visible {
+      outline: 2px solid var(--gold-base);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .rise { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
 </head>
 
 <body>
-<main class="envelope" aria-live="polite">
+  <main class="envelope" aria-live="polite">
 
     <!-- ============================ WELCOME ============================ -->
     <section class="screen welcome active" id="screen-welcome">
-        <div class="rise" style="--i:0">
-            <div class="monogram"><span class="monogram-inner" id="mono-welcome"></span></div>
-        </div>
-        <p class="eyebrow rise" style="--i:1">دعوة خاصة</p>
-        <h1 class="welcome-title rise" style="--i:2">يسعدنا مشاركتكم فرحتنا</h1>
-        <p class="welcome-sub rise" style="--i:3">برجاء إدخال كود الدعوة الخاص بكم للاطّلاع على التفاصيل</p>
+      <div class="rise" style="--i:0">
+        <div class="monogram"><span class="monogram-inner" id="mono-welcome"></span></div>
+      </div>
+      <p class="eyebrow rise" style="--i:1">دعوة خاصة</p>
+      <h1 class="welcome-title rise" style="--i:2">يسعدنا مشاركتكم فرحتنا</h1>
+      <p class="welcome-sub rise" style="--i:3">برجاء إدخال كود الدعوة الخاص بكم للاطّلاع على التفاصيل</p>
 
-        <div class="rise" style="--i:4">
-            <input
-                    id="code-input"
-                    class="code-input"
-                    type="text"
-                    inputmode="text"
-                    autocomplete="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    dir="rtl"
-                    placeholder="برجاء إدخال كود الدعوة"
-                    aria-label="كود الدعوة"
-            />
-            <button id="open-btn" class="btn-primary" type="button">فتح الدعوة</button>
-            <p class="error-msg" id="error-msg" role="alert"></p>
-        </div>
+      <div class="rise" style="--i:4">
+        <input
+          id="code-input"
+          class="code-input"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          dir="rtl"
+          placeholder="برجاء إدخال كود الدعوة"
+          aria-label="كود الدعوة"
+        />
+        <button id="open-btn" class="btn-primary" type="button">فتح الدعوة</button>
+        <p class="error-msg" id="error-msg" role="alert"></p>
+      </div>
     </section>
 
     <!-- ============================ LOADING ============================ -->
     <section class="screen loading" id="screen-loading">
-        <div class="loading-wrap rise" style="--i:0">
-            <div class="monogram loading-mono"><span class="monogram-inner" id="mono-loading"></span></div>
-            <p class="loading-text">جارٍ فتح دعوتكم</p>
-            <div class="dots"><span></span><span></span><span></span></div>
-        </div>
+      <div class="loading-wrap rise" style="--i:0">
+        <div class="monogram loading-mono"><span class="monogram-inner" id="mono-loading"></span></div>
+        <p class="loading-text">جارٍ فتح دعوتكم</p>
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
     </section>
 
     <!-- ============================ REVEAL ============================ -->
     <section class="screen reveal" id="screen-reveal">
-        <div class="rise" style="--i:0">
-            <div class="monogram monogram--sm"><span class="monogram-inner" id="mono-reveal"></span></div>
-        </div>
+      <div class="rise" style="--i:0">
+        <div class="monogram monogram--sm"><span class="monogram-inner" id="mono-reveal"></span></div>
+      </div>
 
-        <p class="guest-eyebrow rise" style="--i:1" id="guest-eyebrow"></p>
-        <p class="greeting rise" style="--i:2" id="greeting"></p>
+      <p class="guest-eyebrow rise" style="--i:1" id="guest-eyebrow"></p>
+      <p class="greeting rise" style="--i:2" id="greeting"></p>
 
-        <div class="ornament rise" style="--i:3">
-            <span class="line"></span><span class="diamond"></span><span class="line right"></span>
-        </div>
+      <div class="ornament rise" style="--i:3">
+        <span class="line"></span><span class="diamond"></span><span class="line right"></span>
+      </div>
 
-        <h1 class="couple-names rise" style="--i:4" id="couple-names"></h1>
-        <p class="invite-line rise" style="--i:5" id="invite-line"></p>
+      <h1 class="couple-names rise" style="--i:4" id="couple-names"></h1>
+      <p class="invite-line rise" style="--i:5" id="invite-line"></p>
 
-        <div class="center rise" style="--i:6" id="guest-wrap">
+      <div class="center rise" style="--i:6" id="guest-wrap">
         <span class="guest-chip">
           <span>عدد الأفراد المسموح بهم:</span>
           <span class="count" id="guest-count"></span>
         </span>
-        </div>
+      </div>
 
-        <div class="details rise" style="--i:7" id="details"></div>
+      <div class="details rise" style="--i:7" id="details"></div>
 
-        <button class="btn-map rise" style="--i:8" id="map-btn" type="button">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-                 stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11Z"/>
-                <circle cx="12" cy="10" r="2.5"/>
-            </svg>
-            <span>افتح الموقع على خرائط جوجل</span>
-        </button>
+      <button class="btn-map rise" style="--i:8" id="map-btn" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11Z"/>
+          <circle cx="12" cy="10" r="2.5"/>
+        </svg>
+        <span>افتح الموقع على خرائط جوجل</span>
+      </button>
 
-        <p class="closing rise" style="--i:9" id="closing"></p>
+      <p class="closing rise" style="--i:9" id="closing"></p>
     </section>
-</main>
+  </main>
 
-<script>
+  <script>
     "use strict";
 
     /* ================================================================
@@ -749,7 +646,7 @@
          → 200 JSON { success: true, guestName, customMessage, allowedGuests }
        Until you set this, a built-in DEMO drives the page so you can preview.
     ================================================================ */
-    const API_URI = "http://localhost:3000/api/verify";
+    const API_URI = "PASTE_YOUR_ENDPOINT_HERE";
 
     /* ================================================================
        ②  EVENT DETAILS (shared by every guest — edit freely)
@@ -758,172 +655,161 @@
        venue, mapUrl, closingLine  (no code changes needed).
     ================================================================ */
     const EVENT_CONFIG = {
-        groomName: "عمر",
-        brideName: "نور",
-        monogram: "ع و ن",   // leave "" to auto-build from the two initials, or set e.g. "أ & ن"
-        inviteLine: "يتشرّفان بدعوتكم لحضور حفل خطوبتهما",
-        date: "الجمعة ٢٥ يوليو ٢٠٢٥",
-        time: "الثامنة والنصف مساءً",
-        venue: "قاعة الماسة — صلاح سالم، القاهرة",
-        mapUrl: "https://www.google.com/maps",
-        closingLine: "في انتظار تشريفكم • دمتم بخير",
+      groomName:   "عمر أحمد محمد علي الجزار",
+      brideName:   "نور ماجد عيد محمد علي",
+      monogram:    "ع و ن",   // leave "" to auto-build from the two initials, or set e.g. "أ & ن"
+      inviteLine:  "يتشرّفان بدعوتكم لحضور حفل خطوبتهما",
+      date:        "الجمعة ٢٥ يوليو ٢٠٢٥",
+      time:        "الثامنة والنصف مساءً",
+      venue:       "قاعة الماسة — صلاح سالم، القاهرة",
+      mapUrl:      "https://www.google.com/maps",
+      closingLine: "في انتظار تشريفكم • دمتم بخير",
     };
     /* ============================================================== */
 
 
     /* ---- Auto DEMO: active only while API_URI is still the placeholder ---- */
-    const USE_DEMO = API_URI === "http://localhost:3000/api/verify";
+    const USE_DEMO = API_URI === "PASTE_YOUR_ENDPOINT_HERE";
 
     /* ---- Inline icons for the details rows ---- */
     const ICONS = {
-        calendar:
-            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>',
-        clock:
-            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
-        pin:
-            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+      calendar:
+        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>',
+      clock:
+        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+      pin:
+        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
     };
 
     /* ---- Element cache ---- */
     const el = {};
-
     function cache() {
-        [
-            "screen-welcome", "screen-loading", "screen-reveal",
-            "mono-welcome", "mono-loading", "mono-reveal",
-            "code-input", "open-btn", "error-msg",
-            "guest-eyebrow", "greeting", "couple-names", "invite-line",
-            "guest-wrap", "guest-count", "details", "map-btn", "closing",
-        ].forEach((id) => {
-            el[id] = document.getElementById(id);
-        });
+      [
+        "screen-welcome", "screen-loading", "screen-reveal",
+        "mono-welcome", "mono-loading", "mono-reveal",
+        "code-input", "open-btn", "error-msg",
+        "guest-eyebrow", "greeting", "couple-names", "invite-line",
+        "guest-wrap", "guest-count", "details", "map-btn", "closing",
+      ].forEach((id) => { el[id] = document.getElementById(id); });
     }
 
     /* ---- Small helpers ---- */
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
     function escapeHtml(str) {
-        return String(str).replace(/[&<>"']/g, (c) =>
-            ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+      return String(str).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
 
     // Western digits → Arabic-Indic (٠١٢…) so counts match the Arabic dates
     function toArabicDigits(v) {
-        return String(v).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
+      return String(v).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
     }
 
     function firstLetter(name) {
-        return (name || "").trim().charAt(0);
+      return (name || "").trim().charAt(0);
     }
 
     function buildMonogram() {
-        const custom = (EVENT_CONFIG.monogram || "").trim();
-        if (custom) return escapeHtml(custom);
-        return (
-            escapeHtml(firstLetter(EVENT_CONFIG.groomName)) +
-            '<span class="monogram-amp">&amp;</span>' +
-            escapeHtml(firstLetter(EVENT_CONFIG.brideName))
-        );
+      const custom = (EVENT_CONFIG.monogram || "").trim();
+      if (custom) return escapeHtml(custom);
+      return (
+        escapeHtml(firstLetter(EVENT_CONFIG.groomName)) +
+        '<span class="monogram-amp">&amp;</span>' +
+        escapeHtml(firstLetter(EVENT_CONFIG.brideName))
+      );
     }
 
     /* ---- Screen transitions ---- */
-    function currentScreen() {
-        return document.querySelector(".screen.active");
-    }
+    function currentScreen() { return document.querySelector(".screen.active"); }
 
     async function goToScreen(next) {
-        const cur = currentScreen();
-        if (cur && cur !== next) {
-            cur.classList.add("leaving");        // fade + drift the old screen out
-            await wait(420);
-            cur.classList.remove("active", "leaving");
-        }
-        next.classList.add("active");          // reveal the new screen
-        void next.offsetWidth;                 // force reflow before staggering in
-        requestAnimationFrame(() => next.classList.add("in"));
-        await wait(90);
+      const cur = currentScreen();
+      if (cur && cur !== next) {
+        cur.classList.add("leaving");        // fade + drift the old screen out
+        await wait(420);
+        cur.classList.remove("active", "leaving");
+      }
+      next.classList.add("active");          // reveal the new screen
+      void next.offsetWidth;                 // force reflow before staggering in
+      requestAnimationFrame(() => next.classList.add("in"));
+      await wait(90);
     }
 
     /* ---- Error UI ---- */
     function showError(msg) {
-        el["error-msg"].textContent = msg;
-        el["error-msg"].classList.add("show");
+      el["error-msg"].textContent = msg;
+      el["error-msg"].classList.add("show");
     }
-
     function clearError() {
-        el["error-msg"].textContent = "";
-        el["error-msg"].classList.remove("show");
+      el["error-msg"].textContent = "";
+      el["error-msg"].classList.remove("show");
     }
-
     function shakeInput() {
-        const input = el["code-input"];
-        input.classList.remove("shake");
-        void input.offsetWidth;
-        input.classList.add("shake");
+      const input = el["code-input"];
+      input.classList.remove("shake");
+      void input.offsetWidth;
+      input.classList.add("shake");
     }
-
     function messageFor(err) {
-        if (err && err.type === "invalid")
-            return "عذرًا، هذا الكود غير صحيح. برجاء التأكد والمحاولة مرة أخرى.";
-        return "تعذّر الاتصال بالخادم حاليًا. برجاء المحاولة مرة أخرى.";
+      if (err && err.type === "invalid")
+        return "عذرًا، هذا الكود غير صحيح. برجاء التأكد والمحاولة مرة أخرى.";
+      return "تعذّر الاتصال بالخادم حاليًا. برجاء المحاولة مرة أخرى.";
     }
 
     /* ---- The mock/real fetch ---- */
     async function verifyCode(code) {
-        // DEMO branch — any code works; type "0000" to preview the error state.
-        if (USE_DEMO) {
-            await wait(900);
-            if (code === "0000") throw {type: "invalid"};
-            return {
-                success: true,
-                guestName: "عائلة الأستاذ محمود",
-                customMessage: "يشرّفنا ويسعدنا دعوتكم لمشاركتنا أجمل لحظات حياتنا",
-                allowedGuests: 3,
-            };
-        }
+      // DEMO branch — any code works; type "0000" to preview the error state.
+      if (USE_DEMO) {
+        await wait(900);
+        if (code === "0000") throw { type: "invalid" };
+        return {
+          success: true,
+          guestName: "عائلة الأستاذ محمود",
+          customMessage: "يشرّفنا ويسعدنا دعوتكم لمشاركتنا أجمل لحظات حياتنا",
+          allowedGuests: 3,
+        };
+      }
 
-        // REAL branch — POST { code } and read the JSON response.
-        let res;
-        try {
-            res = await fetch(API_URI, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({code}),
-            });
-        } catch (_networkErr) {
-            throw {type: "network"};
-        }
-        if (!res.ok) throw {type: "network"};
+      // REAL branch — POST { code } and read the JSON response.
+      let res;
+      try {
+        res = await fetch(API_URI, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        });
+      } catch (_networkErr) {
+        throw { type: "network" };
+      }
+      if (!res.ok) throw { type: "network" };
 
-        let data;
-        try {
-            data = await res.json();
-        } catch (_parseErr) {
-            throw {type: "network"};
-        }
+      let data;
+      try { data = await res.json(); }
+      catch (_parseErr) { throw { type: "network" }; }
 
-        if (!data || data.success !== true) throw {type: "invalid"};
-        return data;
+      if (!data || data.success !== true) throw { type: "invalid" };
+      return data;
     }
 
     /* ---- Fill the reveal screen ---- */
     function overridesFrom(data) {
-        const keys = ["groomName", "brideName", "inviteLine", "date", "time", "venue", "mapUrl", "closingLine"];
-        const out = {};
-        keys.forEach((k) => {
-            if (typeof data[k] === "string" && data[k].trim()) out[k] = data[k];
-        });
-        return out;
+      const keys = ["groomName", "brideName", "inviteLine", "date", "time", "venue", "mapUrl", "closingLine"];
+      const out = {};
+      keys.forEach((k) => {
+        if (typeof data[k] === "string" && data[k].trim()) out[k] = data[k];
+      });
+      return out;
     }
 
     function buildDetails(ev) {
-        const rows = [
-            {icon: ICONS.calendar, label: "التاريخ", value: ev.date},
-            {icon: ICONS.clock, label: "الوقت", value: ev.time},
-            {icon: ICONS.pin, label: "المكان", value: ev.venue},
-        ].filter((r) => r.value && String(r.value).trim());
+      const rows = [
+        { icon: ICONS.calendar, label: "التاريخ", value: ev.date },
+        { icon: ICONS.clock,    label: "الوقت",   value: ev.time },
+        { icon: ICONS.pin,      label: "المكان",  value: ev.venue },
+      ].filter((r) => r.value && String(r.value).trim());
 
-        el.details.innerHTML = rows.map((r) => `
+      el.details.innerHTML = rows.map((r) => `
         <div class="detail-row">
           <div class="detail-icon">${r.icon}</div>
           <div class="detail-text">
@@ -934,101 +820,99 @@
     }
 
     function populateReveal(data) {
-        const ev = Object.assign({}, EVENT_CONFIG, overridesFrom(data));
+      const ev = Object.assign({}, EVENT_CONFIG, overridesFrom(data));
 
-        el["mono-reveal"].innerHTML = buildMonogram();
+      el["mono-reveal"].innerHTML = buildMonogram();
 
-        const guest = (data.guestName || "").trim();
-        el["guest-eyebrow"].textContent = guest ? `أهلًا وسهلًا • ${guest}` : "أهلًا وسهلًا بكم";
+      const guest = (data.guestName || "").trim();
+      el["guest-eyebrow"].textContent = guest ? `أهلًا وسهلًا • ${guest}` : "أهلًا وسهلًا بكم";
 
-        el.greeting.textContent =
-            (data.customMessage || "").trim() || "يسعدنا ويشرّفنا دعوتكم لمشاركتنا فرحتنا";
+      el.greeting.textContent =
+        (data.customMessage || "").trim() || "يسعدنا ويشرّفنا دعوتكم لمشاركتنا فرحتنا";
 
-        el["couple-names"].innerHTML =
-            `${escapeHtml(ev.groomName)} و ${escapeHtml(ev.brideName)}`;
+      el["couple-names"].innerHTML =
+        `<span class="name-line">${escapeHtml(ev.groomName)}</span>` +
+        `<span class="amp">و</span>` +
+        `<span class="name-line">${escapeHtml(ev.brideName)}</span>`;
 
-        el["invite-line"].textContent = ev.inviteLine || "";
+      el["invite-line"].textContent = ev.inviteLine || "";
 
-        const count = Number(data.allowedGuests);
-        if (Number.isFinite(count) && count > 0) {
-            el["guest-count"].textContent = toArabicDigits(count);
-            el["guest-wrap"].style.display = "";
-        } else {
-            el["guest-wrap"].style.display = "none";
-        }
+      const count = Number(data.allowedGuests);
+      if (Number.isFinite(count) && count > 0) {
+        el["guest-count"].textContent = toArabicDigits(count);
+        el["guest-wrap"].style.display = "";
+      } else {
+        el["guest-wrap"].style.display = "none";
+      }
 
-        buildDetails(ev);
+      buildDetails(ev);
 
-        el["map-btn"].onclick = () => window.open(ev.mapUrl, "_blank", "noopener");
+      el["map-btn"].onclick = () => window.open(ev.mapUrl, "_blank", "noopener");
 
-        el.closing.textContent = ev.closingLine || "";
+      el.closing.textContent = ev.closingLine || "";
     }
 
     /* ---- Orchestrate a submission ---- */
     let busy = false;
-
     async function openInvitation() {
-        if (busy) return;
-        const code = el["code-input"].value.trim();
-        clearError();
+      if (busy) return;
+      const code = el["code-input"].value.trim();
+      clearError();
 
-        if (!code) {
-            showError("برجاء إدخال كود الدعوة أولاً");
-            shakeInput();
-            return;
-        }
+      if (!code) {
+        showError("برجاء إدخال كود الدعوة أولاً");
+        shakeInput();
+        return;
+      }
 
-        busy = true;
-        el["open-btn"].disabled = true;
-        await goToScreen(el["screen-loading"]);
+      busy = true;
+      el["open-btn"].disabled = true;
+      await goToScreen(el["screen-loading"]);
 
-        const started = performance.now();
-        // keep the elegant loader on screen for a beat, even if the API is instant
-        const ensureMin = async (min) => {
-            const elapsed = performance.now() - started;
-            if (elapsed < min) await wait(min - elapsed);
-        };
+      const started = performance.now();
+      // keep the elegant loader on screen for a beat, even if the API is instant
+      const ensureMin = async (min) => {
+        const elapsed = performance.now() - started;
+        if (elapsed < min) await wait(min - elapsed);
+      };
 
-        try {
-            const data = await verifyCode(code);
-            await ensureMin(1100);
-            populateReveal(data);
-            await goToScreen(el["screen-reveal"]);
-        } catch (err) {
-            await ensureMin(900);
-            await goToScreen(el["screen-welcome"]);
-            showError(messageFor(err));
-            shakeInput();
-        } finally {
-            busy = false;
-            el["open-btn"].disabled = false;
-        }
+      try {
+        const data = await verifyCode(code);
+        await ensureMin(1100);
+        populateReveal(data);
+        await goToScreen(el["screen-reveal"]);
+      } catch (err) {
+        await ensureMin(900);
+        await goToScreen(el["screen-welcome"]);
+        showError(messageFor(err));
+        shakeInput();
+      } finally {
+        busy = false;
+        el["open-btn"].disabled = false;
+      }
     }
 
     /* ---- Init ---- */
     function init() {
-        cache();
+      cache();
 
-        const mono = buildMonogram();
-        el["mono-welcome"].innerHTML = mono;
-        el["mono-loading"].innerHTML = mono;
+      const mono = buildMonogram();
+      el["mono-welcome"].innerHTML = mono;
+      el["mono-loading"].innerHTML = mono;
 
-        el["open-btn"].addEventListener("click", openInvitation);
-        el["code-input"].addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                openInvitation();
-            }
-        });
-        el["code-input"].addEventListener("input", clearError);
+      el["open-btn"].addEventListener("click", openInvitation);
+      el["code-input"].addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); openInvitation(); }
+      });
+      el["code-input"].addEventListener("input", clearError);
 
-        // play the welcome entrance
-        requestAnimationFrame(() =>
-            requestAnimationFrame(() => el["screen-welcome"].classList.add("in"))
-        );
+      // play the welcome entrance
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => el["screen-welcome"].classList.add("in"))
+      );
     }
 
     document.addEventListener("DOMContentLoaded", init);
-</script>
+  </script>
 </body>
 </html>
