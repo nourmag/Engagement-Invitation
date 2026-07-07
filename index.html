@@ -70,8 +70,9 @@
 
     * { box-sizing: border-box; }
 
-    html, body { height: 100%; }
-
+    /* NOTE: no fixed height on html/body — that was clipping the card when it
+       grew taller than the screen. min-height + margin:auto centers when short
+       and lets the page scroll when tall. */
     body {
       margin: 0;
       min-height: 100dvh;
@@ -184,6 +185,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
       background: linear-gradient(135deg, var(--gold-deep), var(--gold-hi), var(--gold-base));
       -webkit-background-clip: text;
       background-clip: text;
@@ -396,10 +398,10 @@
       text-align: center;
       font-family: "Amiri", serif;
       font-weight: 700;
-      font-size: clamp(30px, 7.6vw, 46px);
+      font-size: clamp(30px, 7.6vw, 46px);   /* JS shrinks below this if a name is too wide */
       line-height: 1.3;
       margin: 0;
-      padding: 0.04em 0.04em 0.3em;   /* bottom room so name swashes aren't clipped */
+      padding: 0.04em 0.04em 0.3em;          /* bottom room so name swashes aren't clipped */
       background: linear-gradient(120deg,
         var(--gold-deep) 0%, var(--gold-hi) 30%, var(--gold-base) 55%, var(--gold-hi) 76%, var(--gold-deep) 100%);
       background-size: 200% auto;
@@ -409,7 +411,8 @@
       filter: drop-shadow(0 3px 12px rgba(198, 161, 91, 0.22));
       animation: goldShimmer 6.5s linear infinite;
     }
-    .couple-names .name-line { display: block; line-height: 1.5; }
+    /* nowrap = each name stays on one line; the fit-to-width script keeps it inside the card */
+    .couple-names .name-line { display: block; line-height: 1.5; white-space: nowrap; }
     .couple-names .amp { font-size: 0.5em; line-height: 1; }
 
     .invite-line {
@@ -720,6 +723,30 @@
       );
     }
 
+    /* ---- Fit the couple's names on one line, as large as will fit the card ----
+       Long full names would otherwise overflow on narrow screens. We measure the
+       widest name and, if it exceeds the available width, scale the whole block
+       down proportionally. Runs after reveal is shown, after fonts load, on resize. */
+    function fitNames() {
+      const c = el["couple-names"];
+      if (!c || !c.clientWidth) return;                 // hidden / not laid out yet
+      const lines = c.querySelectorAll(".name-line");
+      if (!lines.length) return;
+
+      c.style.fontSize = "";                             // reset to the CSS clamp value
+      const base = parseFloat(getComputedStyle(c).fontSize);
+      const cs = getComputedStyle(c);
+      const avail = c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+
+      let widest = 0;
+      lines.forEach((l) => { widest = Math.max(widest, l.scrollWidth); });
+
+      if (widest > avail && widest > 0) {
+        const size = Math.max(base * (avail / widest) * 0.97, 15);   // 0.97 safety, 15px floor
+        c.style.fontSize = size + "px";
+      }
+    }
+
     /* ---- Screen transitions ---- */
     function currentScreen() { return document.querySelector(".screen.active"); }
 
@@ -881,6 +908,9 @@
         await ensureMin(1100);
         populateReveal(data);
         await goToScreen(el["screen-reveal"]);
+        // names are now visible → size them to fit (and re-fit once fonts are ready)
+        requestAnimationFrame(fitNames);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
       } catch (err) {
         await ensureMin(900);
         await goToScreen(el["screen-welcome"]);
@@ -905,6 +935,13 @@
         if (e.key === "Enter") { e.preventDefault(); openInvitation(); }
       });
       el["code-input"].addEventListener("input", clearError);
+
+      // re-fit names when the window resizes (only acts while reveal is visible)
+      let resizeT;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(fitNames, 150);
+      });
 
       // play the welcome entrance
       requestAnimationFrame(() =>
