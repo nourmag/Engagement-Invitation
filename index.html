@@ -357,8 +357,8 @@
     .guest-eyebrow {
       text-align: center;
       color: var(--gold-deep);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 20px;
+      font-weight: 700;
       margin: 20px 0 8px;
     }
     .greeting {
@@ -663,8 +663,8 @@
       brideName:   "نور ماجد عيد محمد علي",
       monogram:    "ع و ن",   // leave "" to auto-build from the two initials, or set e.g. "أ & ن"
       inviteLine:  "يتشرّفان بدعوتكم لحضور حفل خطوبتهما",
-      date:        "الجمعة ٢٥ يوليو ٢٠٢٥",
-      time:        "الثامنة والنصف مساءً",
+      date:        "الجمعة ٧ أغسطس  ٢٠٢٦",
+      time:        "الرابعة مساءًً",
       venue:       "قاعة الماسة — صلاح سالم، القاهرة",
       mapUrl:      "https://www.google.com/maps",
       closingLine: "في انتظار تشريفكم • دمتم بخير",
@@ -864,7 +864,7 @@
       el["mono-reveal"].innerHTML = buildMonogram();
 
       const guest = (data.guestName || "").trim();
-      el["guest-eyebrow"].textContent = guest ? `أهلًا وسهلًا • ${guest}` : "أهلًا وسهلًا بكم";
+      el["guest-eyebrow"].innerHTML = guest ? `أهلًا وسهلًا • <br>${guest}` : "أهلًا وسهلًا بكم";
 
       el.greeting.textContent =
         (data.customMessage || "").trim() || "يسعدنا ويشرّفنا دعوتكم لمشاركتنا فرحتنا";
