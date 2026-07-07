@@ -28,13 +28,13 @@ export default async function handler(req, res) {
         // You can add, edit, or remove entries here.
         // Keys are converted to uppercase automatically to prevent typos by older relatives.
         const guestDatabase = {
-            "": {
-                guestName: "",
-                customMessage: "",
-                allowedGuests: 0
+            "tawnt": {
+                guestName: "طنط رانداا",
+                customMessage: "ازاي حضرتك 😆, كتبت اسم حضرتك صح اهو😆",
+                allowedGuests: 3
             },
             "koftaNo1": {
-                guestName: "وسام سلامة إسماعيل، <br> أمي 🤣",
+                guestName: "وسام سلامة إسماعيل، <br> أمي 😆",
                 customMessage: "بعزمك اهو عشان متقوليش عزمت حماتك و مراتك و عمتك و معزمتنيش🤣🤣🤣",
                 allowedGuests: 3
             },
@@ -42,6 +42,11 @@ export default async function handler(req, res) {
                 guestName: "Nour Maged beh",
                 customMessage: "ايوا 🤣، بعزمك علي خطوبتك 🥳🥳🥳، متنسيش تجيبي الشبكة بقا",
                 allowedGuests: 3
+            },
+            "3ma_3moooma": {
+                guestName: "Noha Mohammed Ali <br>and her beautiful family",
+                customMessage: "عمتيييي حبيبتي مستنيكي🤣♥️♥️",
+                allowedGuests: 5
             }
         };
 
