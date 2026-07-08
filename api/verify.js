@@ -47,6 +47,11 @@ export default async function handler(req, res) {
                 guestName: "Noha Mohammed Ali <br>and her beautiful family",
                 customMessage: "عمتيييي حبيبتي مستنيكي🤣♥️♥️",
                 allowedGuests: 5
+            },
+            "aboTyara": {
+                guestName: "Sloom Beh",
+                customMessage: "ازيك يا سلوم بيه، كان نفسي تكون معانا والله واحشني يا ملك، انا بعتبرك موجود معانا وبعزمك",
+                allowedGuests: 0
             }
         };
 
