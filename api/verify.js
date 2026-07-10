@@ -1,81 +1,44 @@
+import { guestDatabase } from "./_lib/guests.js";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+    url:   process.env.KV_REST_API_URL   || process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
 export default async function handler(req, res) {
-    // 1. Configure CORS headers to allow your frontend to communicate with this API
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Change '*' to your specific domain later if you want to restrict access
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-
-    // 2. Handle CORS Preflight request
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
-
-    // 3. Restrict endpoint to POST requests only
-    if (req.method !== 'POST') {
-        return res.status(405).json({success: false, error: 'Method Not Allowed'});
-    }
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") return res.status(200).end();
+    if (req.method !== "POST") return res.status(405).json({ success: false, error: "Method Not Allowed" });
 
     try {
-        const {code} = req.body;
+        const { code } = req.body || {};
+        if (!code) return res.status(400).json({ success: false, error: "Invitation code is required" });
 
-        // Validate that a code was actually passed
-        if (!code) {
-            return res.status(400).json({success: false, error: 'Invitation code is required'});
-        }
+        const cleanCode = String(code).trim();
+        const guest = guestDatabase[cleanCode];
+        if (!guest) return res.status(404).json({ success: false, error: "كود الدعوة غير صحيح، يرجى التأكد وإعادة المحاولة" });
 
-        // 4. GUEST REGISTRY (Your Code Database)
-        // You can add, edit, or remove entries here.
-        // Keys are converted to uppercase automatically to prevent typos by older relatives.
-        const guestDatabase = {
-            "tawnt": {
-                guestName: "طنط رانداا",
-                customMessage: "ازاي حضرتك 😆, كتبت اسم حضرتك صح اهو😆",
-                allowedGuests: 3
-            },
-            "koftaNo1": {
-                guestName: "وسام سلامة إسماعيل، <br> أمي 😆",
-                customMessage: "بعزمك اهو عشان متقوليش عزمت حماتك و مراتك و عمتك و معزمتنيش🤣🤣🤣",
-                allowedGuests: 3
-            },
-            "Ms.KnowEverything": {
-                guestName: "Nour Maged beh",
-                customMessage: "ايوا 🤣، بعزمك علي خطوبتك 🥳🥳🥳، متنسيش تجيبي الشبكة بقا",
-                allowedGuests: 3
-            },
-            "3ma_3moooma": {
-                guestName: "Noha Mohammed Ali <br>and her beautiful family",
-                customMessage: "عمتيييي حبيبتي مستنيكي🤣♥️♥️",
-                allowedGuests: 5
-            },
-            "aboTyara": {
-                guestName: "Sloom Beh",
-                customMessage: "ازيك يا سلوم بيه، كان نفسي تكون معانا والله واحشني يا ملك، انا بعتبرك موجود معانا وبعزمك",
-                allowedGuests: 0
-            }
-        };
-
-        // Sanitize input: remove accidental spaces and force uppercase
-        const cleanCode = code.trim();
-        const guestData = guestDatabase[cleanCode];
-
-        // 5. Return Response based on match evaluation
-        if (guestData) {
-            return res.status(200).json({
-                success: true,
-                guestName: guestData.guestName,
-                customMessage: guestData.customMessage,
-                allowedGuests: guestData.allowedGuests
+        // existing RSVP + lightweight access log (never block verify if Redis hiccups)
+        let rsvp = null;
+        try {
+            rsvp = await redis.get(`rsvp:${cleanCode}`);
+            const seen = await redis.get(`seen:${cleanCode}`);
+            await redis.set(`seen:${cleanCode}`, {
+                code: cleanCode, guestName: guest.guestName,
+                opens: ((seen && seen.opens) || 0) + 1, lastSeen: new Date().toISOString(),
             });
-        } else {
-            return res.status(404).json({
-                success: false,
-                error: 'كود الدعوة غير صحيح، يرجى التأكد وإعادة المحاولة'
-            });
-        }
+        } catch (e) { console.error("KV read failed:", e); }
 
-    } catch (error) {
-        console.error("Backend Error:", error);
-        return res.status(500).json({success: false, error: 'Internal Server Error'});
+        return res.status(200).json({
+            success: true, code: cleanCode,
+            guestName: guest.guestName, customMessage: guest.customMessage,
+            allowedGuests: guest.allowedGuests, rsvp: rsvp || null,
+        });
+    } catch (err) {
+        console.error("Backend Error:", err);
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
     }
 }
