@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Omar & Nour · Engagement RSVP</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --bg: #FAF3ED;
+            --paper: #FFF9F4;
+            --green: #117813;
+            --green-dark: #4C6451;
+            --rose: #D7A6A1;
+            --champagne: #E9D7B8;
+            --gold: #B58B47;
+            --gold-light: #D8C39A;
+            --text: #473B34;
+            --white: #FFFFFF;
+        }
+
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: 'Inter', 'Cormorant Garamond', serif;
+            background: var(--bg);
+            overflow-x: hidden;
+        }
+
+        /* ===== FULLSCREEN PHOTO WITH TEXT OVERLAY ===== */
+        .hero-section {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Dark overlay for text readability */
+        .hero-section::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        /* Text on top of photo */
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+            color: var(--white);
+            width: 90%;
+            max-width: 800px;
+            animation: fadeDown 1.2s ease both;
+        }
+
+        .hero-content .floral-motive {
+            font-size: 2.8rem;
+            color: var(--gold-light);
+            letter-spacing: 40px;
+            opacity: 0.8;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--white);
+            line-height: 1.1;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+            margin-top: 0.2rem;
+        }
+
+        .hero-content h1 small {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: var(--white);
+            opacity: 0.95;
+            margin-top: 0.2rem;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .save-the-date {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-style: italic;
+            letter-spacing: 6px;
+            color: var(--white);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+            margin-top: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* ===== CONTENT WRAPPER (Background below photo) ===== */
+        .content-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        /* ===== CONTENT SECTION ===== */
+        .content-section {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            position: relative;
+        }
+
+        /* ===== FLOWER PATTERNS ===== */
+        .content-wrapper::before,
+        .content-wrapper::after {
+            content: "";
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            opacity: 0.7;
+            pointer-events: none;
+            background-repeat: no-repeat;
+            background-size: contain;
+            z-index: 0;
+        }
+
+        .content-wrapper::before {
+            top: -20px;
+            left: -80px;
+            background-image: url("https://thf.bing.com/th/id/R.99b56d0bba1843fc38a675715f7b845c?rik=ox6S%2bvSN%2bfyh0A&riu=http%3a%2f%2fclipart-library.com%2fimages_k%2fvines-transparent%2fvines-transparent-22.png&ehk=xLm6pfi1aDIAX%2f2ZqbRuZVeHKiUWOEcUsCUeDcN8%2bxs%3d&risl=&pid=ImgRaw&r=0");
+        }
+
+        .content-wrapper::after {
+            bottom: -80px;
+            right: -80px;
+            transform: rotate(180deg);
+            background-image: url("https://thf.bing.com/th/id/R.99b56d0bba1843fc38a675715f7b845c?rik=ox6S%2bvSN%2bfyh0A&riu=http%3a%2f%2fclipart-library.com%2fimages_k%2fvines-transparent%2fvines-transparent-22.png&ehk=xLm6pfi1aDIAX%2f2ZqbRuZVeHKiUWOEcUsCUeDcN8%2bxs%3d&risl=&pid=ImgRaw&r=0");
+        }
+
+        /* Extra flower patterns */
+        .extra-flowers::before,
+	.extra-flowers::after {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background-image: url("https://thf.bing.com/th/id/R.99b56d0bba1843fc38a675715f7b845c?rik=ox6S%2bvSN%2bfyh0A&riu=http%3a%2f%2fclipart-library.com%2fimages_k%2fvines-transparent%2fvines-transparent-22.png&ehk=xLm6pfi1aDIAX%2f2ZqbRuZVeHKiUWOEcUsCUeDcN8%2bxs%3d&risl=&pid=ImgRaw&r=0");
+            background-repeat: no-repeat;
+            background-size: contain;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .extra-flowers::before {
+            top: 200px;
+            right: -330px;
+            transform: scaleX(-1);
+        }
+
+        .extra-flowers::after {
+            bottom: -1100px;
+            left: -330px;
+            transform: rotate(180deg) scaleX(-1);
+        }
+
+        /* All content sits above decorations */
+        .content-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== INVITATION TEXT (PLAIN, NO CARD) ===== */
+        .invitation-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            line-height: 1.7;
+            color: var(--text);
+            text-align: center;
+            padding: 0.5rem 0.5rem 0.2rem;
+            margin-bottom: 0.8rem;
+            animation: fadeUp 1s ease both;
+            animation-delay: 0.2s;
+        }
+
+        .invitation-text .highlight {
+            font-weight: 1000;
+            color: var(--green);
+        }
+
+        /* ===== INFO GRID (CARDS) ===== */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin: 1.5rem 0 2.5rem;
+            animation: fadeUp 1s ease both;
+            animation-delay: 0.4s;
+        }
+
+        .info-item {
+            background: var(--paper);
+            border-radius: 28px;
+            padding: 15px 10px 30px 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.35s ease;
+            border: 1px solid rgba(214, 201, 186, 0.15);
+        }
+
+        .info-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        .info-item .icon {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 0.01rem;
+            color: var(--green);
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        .info-item .label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--green);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .info-item .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.3px;
+        }
+
+        .info-item .value small {
+            font-weight: 400;
+            font-size: 1.3rem;
+            color: var(--gold);
+            display: block;
+            font-style: italic;
+        }
+
+
+/* ===== GOOGLE MAPS SECTION (Desktop Styles) ===== */
+.map-section {
+    margin-top: 2.5rem;
+    margin-bottom: 3rem;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(214, 201, 186, 0.15);
+    animation: fadeUp 1s ease both;
+    animation-delay: 0.5s;
+}
+
+.map-section iframe {
+    width: 100%;
+    height: 400px;
+    display: block;
+    border: none;
+}
+
+.map-label {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: var(--text);
+    padding: 1.2rem 1.5rem;
+    background: var(--paper);
+    border-bottom: 1px solid rgba(214, 201, 186, 0.15);
+}
+
+.map-label .icon {
+    color: var(--gold);
+    margin-right: 10px;
+    font-size: 1.6rem;
+}
+
+.map-label .address {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: #7a6a5e;
+    margin-top: 4px;
+    font-style: normal;
+    letter-spacing: 0.3px;
+}
+
+
+        /* ===== FORM (CARD) ===== */
+        .rsvp-form {
+            margin-top: 0.5rem;
+            padding: 2.2rem 2.5rem 1.8rem;
+            border-radius: 44px;
+            background: rgba(255, 253, 250, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(214, 201, 186, 0.12);
+            position: relative;
+            animation: fadeUp 1.1s ease both;
+            animation-delay: 0.6s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        .rsvp-form::before {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            top: -45px;
+            right: -30px;
+            opacity: 0.6;
+            background-image: url("https://png.pngtree.com/png-clipart/20230428/ourmid/pngtree-free-vector-big-green-leaf-of-tropical-monstera-plant-isolated-on-png-image_6743005.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+
+        .form-group {
+            margin-bottom: 1.4rem;
+        }
+
+        label {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.95rem 1.6rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            background: rgba(255, 253, 250, 0.70);
+            border: 1.5px solid #d6d9cd;
+            border-radius: 60px;
+            transition: border 0.25s, box-shadow 0.25s, background 0.25s;
+            outline: none;
+            color: var(--text);
+            font-weight: 400;
+            letter-spacing: 0.02rem;
+        }
+
+        input:focus {
+            border-color: var(--gold);
+            border-width: 1.5px;
+            box-shadow: 0 0 0 4px rgba(181, 139, 71, 0.12);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        input::placeholder {
+            color: #c2cdb8;
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--green), #98d8a0);
+            color: var(--white);
+            border: none;
+            padding: 1.1rem 2rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 1.05rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-radius: 60px;
+            margin-top: 0.4rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 24px rgba(86, 114, 91, 0.18);
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #7fa385, #a8e8b0);
+            box-shadow: 0 10px 32px rgba(86, 114, 91, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.97);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            transform: none;
+        }
+
+        /* ===== THANK YOU MESSAGE ===== */
+        .thankyou-message {
+            display: none;
+            text-align: center;
+            padding: 2rem 1.6rem;
+            background: rgba(255, 253, 250, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            margin-top: 2rem;
+            border: 1px solid rgba(214, 201, 186, 0.12);
+            animation: fadeUp 0.8s ease both
+	    position: relative;
+        }
+
+.thankyou-message::before {
+    content: "";
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    top: -45px;
+    right: -30px;
+    opacity: 0.6;
+    background-image: url("https://png.pngtree.com/png-clipart/20230428/ourmid/pngtree-free-vector-big-green-leaf-of-tropical-monstera-plant-isolated-on-png-image_6743005.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+        .thankyou-message.show {
+            display: block;
+        }
+
+        .thankyou-message h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 450;
+            color: var(--gold);
+            margin-bottom: 0.2rem;
+        }
+
+        .thankyou-message p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: var(--green);
+        }
+
+        .thankyou-message .divider {
+            margin-top: 0.6rem;
+            font-size: 1.6rem;
+            color: var(--gold);
+            letter-spacing: 8px;
+            opacity: 0.6;
+        }
+
+        /* ===== FOOTNOTE ===== */
+        .footnote {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            font-style: italic;
+            color: var(--green);
+            border-top: 1px solid rgba(160, 185, 145, 0.12);
+            padding-top: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footnote span {
+            font-family: 'Inter', sans-serif;
+            font-style: normal;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.4;
+            color: var(--green-dark);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 900px) {
+    .hero-content h1 {
+        font-size: 3.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        height: 70vh;
+    }
+
+    .hero-content h1 {
+        font-size: 3rem;
+    }
+
+    .hero-content h1 small {
+        font-size: 1.2rem;
+        letter-spacing: 6px;
+    }
+
+    .hero-content .floral-motive {
+        font-size: 2.2rem;
+        letter-spacing: 30px;
+    }
+
+    .save-the-date {
+        font-size: 1.4rem;
+    }
+
+    .content-wrapper {
+        padding: 2rem 0;
+    }
+
+    /* ===== EXTRA FLOWERS - SMALLER ===== */
+    .extra-flowers::before,
+    .extra-flowers::after {
+        width: 180px !important;  /* Smaller than desktop */
+        height: 180px !important;
+        opacity: 0.3;
+    }
+
+    .extra-flowers::before {
+        top: 100px;
+        right: -60px;
+    }
+
+    .extra-flowers::after {
+        bottom: auto;
+        top: 400px;
+        left: -60px;
+    }
+
+    .content-wrapper::before,
+    .content-wrapper::after {
+        width: 200px;
+        height: 200px;
+        opacity: 0.5;
+    }
+
+    .invitation-text {
+        font-size: 1.15rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin: 1rem 0 2rem;
+    }
+
+    .info-item {
+        padding: 22px 16px;
+        border-radius: 22px;
+    }
+
+    .rsvp-form {
+        padding: 1.6rem 1.2rem 1.2rem;
+        border-radius: 32px;
+        margin: 3rem 0rem;
+    }
+
+    .rsvp-form::before,
+	.thankyou-message::before {
+        width: 100px;
+        height: 100px;
+        top: -25px;
+        right: -15px;
+    }
+
+    .btn-submit {
+        font-size: 0.9rem;
+        letter-spacing: 2.5px;
+        padding: 0.9rem 1.2rem;
+    }
+
+    .thankyou-message {
+        padding: 1.4rem 1rem;
+    }
+    .thankyou-message h3 {
+        font-size: 1.8rem;
+    }
+    .thankyou-message p {
+        font-size: 1.1rem;
+    }
+
+    /* ===== MAP SECTION - SMALLER TEXT ===== */
+    .map-section {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(214, 201, 186, 0.15);
+    }
+
+    .map-section iframe {
+        width: 100%;
+        height: 300px;
+        display: block;
+        border: none;
+    }
+
+    .map-label {
+        text-align: center;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.2rem; /* Smaller */
+        color: var(--text);
+        padding: 0.8rem 1rem;
+        background: var(--paper);
+        border-bottom: 1px solid rgba(214, 201, 186, 0.15);
+    }
+
+    .map-label .icon {
+        color: var(--gold);
+        margin-right: 6px;
+        font-size: 1.2rem; /* Smaller icon */
+    }
+
+    .map-label .address {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem; /* Much smaller address */
+        font-weight: 300;
+        color: #7a6a5e;
+        margin-top: 2px;
+        font-style: normal;
+        letter-spacing: 0.2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        height: 60vh;
+    }
+
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-content h1 small {
+        font-size: 1rem;
+        letter-spacing: 4px;
+    }
+
+    .hero-content .floral-motive {
+        font-size: 1.8rem;
+        letter-spacing: 20px;
+    }
+
+    .save-the-date {
+        font-size: 1.2rem;
+        letter-spacing: 4px;
+    }
+
+    .content-wrapper {
+        padding: 1.5rem 0;
+    }
+
+    /* ===== EXTRA FLOWERS - EVEN SMALLER ===== */
+    .extra-flowers::before,
+    .extra-flowers::after {
+        width: 120px !important;
+        height: 120px !important;
+        opacity: 0.25;
+    }
+
+    .extra-flowers::before {
+        top: 80px;
+        right: -40px;
+    }
+
+    .extra-flowers::after {
+        top: 350px;
+        left: -40px;
+    }
+
+    .content-wrapper::before,
+    .content-wrapper::after {
+        width: 140px;
+        height: 140px;
+        opacity: 0.4;
+    }
+
+    .invitation-text {
+        font-size: 1rem;
+    }
+
+    .info-item .value {
+        font-size: 1rem;
+    }
+    .info-item .value small {
+        font-size: 0.8rem;
+    }
+
+    .rsvp-form {
+        padding: 1.2rem 0.8rem 0.8rem;
+        border-radius: 24px;
+    }
+
+    .rsvp-form::before,
+	.thankyou-message::before {
+        width: 80px;
+        height: 80px;
+        top: -20px;
+        right: -10px;
+    }
+
+    .btn-submit {
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        padding: 0.8rem 1rem;
+    }
+
+    .thankyou-message h3 {
+        font-size: 1.5rem;
+    }
+    .thankyou-message p {
+        font-size: 1rem;
+    }
+
+    .footnote {
+        font-size: 0.9rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+    }
+
+    /* ===== MAP SECTION - EVEN SMALLER ===== */
+    .map-section {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 22px;
+    }
+
+    .map-section iframe {
+        height: 220px;
+    }
+
+    .map-label {
+        font-size: 1rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .map-label .icon {
+        font-size: 1rem;
+        margin-right: 4px;
+    }
+
+    .map-label .address {
+        font-size: 0.7rem; /* Even smaller */
+        line-height: 1.3;
+    }
+}
+
+@media (max-width: 360px) {
+    .hero-section {
+        height: 50vh;
+    }
+
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-content h1 small {
+        font-size: 0.8rem;
+        letter-spacing: 3px;
+    }
+
+    .hero-content .floral-motive {
+        font-size: 1.5rem;
+        letter-spacing: 15px;
+    }
+
+    .save-the-date {
+        font-size: 1rem;
+    }
+
+    .content-section {
+        padding: 0 0.8rem;
+    }
+
+    /* ===== EXTRA FLOWERS - TINIEST ===== */
+    .extra-flowers::before,
+    .extra-flowers::after {
+        width: 90px !important;
+        height: 90px !important;
+        opacity: 0.2;
+    }
+
+    .extra-flowers::before {
+        top: 60px;
+        right: -30px;
+    }
+
+    .extra-flowers::after {
+        top: 300px;
+        left: -30px;
+    }
+
+    .content-wrapper::before,
+    .content-wrapper::after {
+        width: 100px;
+        height: 100px;
+        opacity: 0.3;
+    }
+
+    .info-item {
+        padding: 18px 12px;
+        border-radius: 18px;
+    }
+
+    .rsvp-form {
+        padding: 1rem 0.6rem 0.6rem;
+        border-radius: 20px;
+    }
+
+    .rsvp-form::before,
+	.thankyou-message::before {
+        width: 60px;
+        height: 60px;
+        top: -15px;
+        right: -8px;
+    }
+
+    input {
+        padding: 0.8rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-submit {
+        font-size: 0.7rem;
+        padding: 0.7rem 0.8rem;
+    }
+
+    /* ===== MAP SECTION - TINIEST ===== */
+    .map-section {
+        margin-top: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-radius: 18px;
+    }
+
+    .map-section iframe {
+        height: 180px;
+    }
+
+    .map-label {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .map-label .icon {
+        font-size: 0.85rem;
+        margin-right: 3px;
+    }
+
+    .map-label .address {
+        font-size: 0.6rem;
+        line-height: 1.2;
+    }
+}
+
+</style>
+</head>
+<body>
+
+    <!-- ===== HERO SECTION: PHOTO + NAMES ON TOP ===== -->
+    <section class="hero-section">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80" 
+             alt="Engagement celebration">
+        
+        <!-- Text overlay on photo -->
+        <div class="hero-content">
+            <div class="floral-motive">❧ ✤ ❦</div>
+            <h1>
+                Omar & Nour
+                <small>— 2026 · 08 · 07 —</small>
+            </h1>
+            <div class="save-the-date">Save the Date!</div>
+        </div>
+    </section>
+
+    <!-- ===== CONTENT WRAPPER: Everything below the photo ===== -->
+    <div class="content-wrapper">
+        <section class="content-section">
+            <div class="extra-flowers"></div>
+
+            <!-- Invitation Text (PLAIN - NO CARD) -->
+            <div class="invitation-text">
+                We joyfully invite you to our <span class="highlight">Engagement Party</span>.<br>
+                Waiting for you on <span class="highlight">August 7th</span>.
+            </div>
+
+            <!-- ===== INFO CARDS ===== -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="icon">✦</span>
+                    <span class="label">Place</span>
+                    <span class="value">Venice Hall<br><small>Nile Lotus Boat</small></span>
+                </div>
+                <div class="info-item">
+                    <span class="icon">✦</span>
+                    <span class="label">Time</span>
+                    <span class="value">4:00 pm<br><small>Ceremony</small></span>
+                </div>
+                <div class="info-item">
+                    <span class="icon">✦</span>
+                    <span class="label">Meal</span>
+                    <span class="value">Mix Grill Dinner<br><small>with Desserts</small></span>
+                </div>
+            </div>
+
+<div class="map-section">
+    <div class="map-label">
+        <span class="icon">📍</span>Find Us
+        <span class="address">Marsa Al-Nahr Al-Khaled, Maadi, Cairo<br>مرسى النهر الخالد، المعادي، القاهرة</span>
+    </div>
+    <!-- Replace the src URL with your actual Google Maps embed link -->
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d864.2622112747543!2d31.262869497087507!3d29.949273618668716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145839001c1ae8df%3A0xf1496ff033f33c21!2sNileLotusCruise!5e0!3m2!1sen!2seg!4v1783733941133!5m2!1sen!2seg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">
+	</iframe>
+	</div>
+
+            <!-- ===== RSVP FORM ===== -->
+            <form id="rsvpForm" class="rsvp-form" novalidate>
+                <div class="form-group">
+                    <label for="fullName">Full Name | الاسم الكامل</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="e.g. Ahmed Mohamed" required>
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">I'm attending</button>
+            </form>
+
+            <!-- ===== CONFIRMATION ===== -->
+            <div id="thankyouMessage" class="thankyou-message">
+                <h3>With heartfelt thanks</h3>
+                <p>Your response has been received.<br>We look forward to celebrating with you.<br> لقد وصل ردكم، في انتظاركم في الموعد المحدد</p>
+                <div class="divider">✦ ✦ ✦</div>
+            </div>
+
+            <!-- ===== FOOTER ===== -->
+            <footer class="footnote">
+                <span>— Made by Bride & Groom —</span>
+            </footer>
+
+        </section>
+    </div>
+
+    <!-- ===== SCRIPT ===== -->
+    <script>
+        (function() {
+            const form = document.getElementById('rsvpForm');
+            const thankYou = document.getElementById('thankyouMessage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const fullName = document.getElementById('fullName');
+                let valid = true;
+
+                if (!fullName.value.trim()) {
+                    fullName.style.borderColor = '#b27b6a';
+                    valid = false;
+                } else {
+                    fullName.style.borderColor = '#d6d9cd';
+                }
+
+                if (!valid) return;
+
+                form.style.display = 'none';
+                thankYou.classList.add('show');
+                thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                submitBtn.disabled = true;
+            });
+
+            document.getElementById('fullName').addEventListener('focus', function() {
+                this.style.borderColor = '#d6d9cd';
+            });
+        })();
+    </script>
+
+</body>
+</html>
